@@ -1,5 +1,12 @@
 #include "TXLib.h"
 
+struct SBird
+    {
+    int x, y, vx, vy;
+    double size;
+    COLORREF color;
+    };
+
 void MoveBird ();
 void Colors (int* x, COLORREF* birdColor, COLORREF first, COLORREF second, COLORREF third, COLORREF fourth, COLORREF fifth);
 void Physics (int* x, int* y, int* vx, int* vy, int dt);
@@ -9,7 +16,7 @@ void DrawBird (int x, int y,
                double leg, double step, double wing,
                double tail, double wind,
                COLORREF birdColor);
-void DrawBirdHelper (int x, int y, int vx, int vy, double size, COLORREF birdColor, int t);
+void DrawBirdHelper (SBird bird, int t);
 //-----------------------------------------------------------------------------
 
 int main ()
@@ -25,64 +32,57 @@ int main ()
 
 void MoveBird ()
     {
-    int x = 500, y = 325;
-    int vx = 3, vy = 1;
-    COLORREF birdColor  = RGB (0, 0, 0);
-
-    int x2 = 100, y2 = 200;
-    int vx2 = 4, vy2 = 2;
-    COLORREF birdColor2 = RGB (0, 0, 0);
-
-    int x3 = 300, y3 = 0;
-    int vx3 = 1, vy3 = 3;
-    COLORREF birdColor3 = RGB (0, 0, 0);
-
-    int x4 = 800, y4 = 500;
-    int vx4 = 3, vy4 = 4;
-    COLORREF birdColor4 = RGB (0, 0, 0);
+    SBird bird1 = {500, 325, 3, 1, 1.7, RGB (0, 0, 0)};
+    SBird bird2 = {100, 200, 4, 2,   2, RGB (0, 0, 0)};
+    SBird bird3 = {300,   0, 1, 3, 1.3, RGB (0, 0, 0)};
+    SBird bird4 = {800, 500, 3, 4, 2.2, RGB (0, 0, 0)};
 
     int t = 0;
     int dt = 1;
+
+    txBegin ();
 
     while (true)
         {
         txSetFillColor (RGB (26, 140, 255));
         txClear ();
 
-        Colors ( &x, &birdColor , RGB (2, 96, 2), RGB (100, 142, 62), RGB (0, 187, 0), RGB (44, 244, 28), RGB (189, 255, 189));
-        Colors (&x2, &birdColor2, RGB (4, 22, 187), RGB (100, 128, 255), RGB (90, 154, 241), RGB (17, 255, 255), RGB (1, 186, 158));
-        Colors (&x3, &birdColor3, RGB (128, 0, 255), RGB (128, 0, 128), RGB (253, 2, 234), RGB (254, 141, 242), RGB (255, 0, 128));
-        Colors (&x4, &birdColor4, RGB (255, 0, 0), RGB (255, 140, 140), RGB (255, 128, 0), RGB (243, 191, 12), RGB (255, 255, 0));
+        Colors (&bird1.x, &bird1.color, RGB (  2, 96,   2), RGB (100, 142,  62), RGB (  0, 187,   0), RGB ( 44, 244,  28), RGB (189, 255, 189));
+        Colors (&bird2.x, &bird2.color, RGB (  4, 22, 187), RGB (100, 128, 255), RGB ( 90, 154, 241), RGB ( 17, 255, 255), RGB (  1, 186, 158));
+        Colors (&bird3.x, &bird3.color, RGB (128,  0, 255), RGB (128,   0, 128), RGB (253,   2, 234), RGB (254, 141, 242), RGB (255,   0, 128));
+        Colors (&bird4.x, &bird4.color, RGB (255,  0,   0), RGB (255, 140, 140), RGB (255, 128,   0), RGB (243, 191,  12), RGB (255, 255,   0));
 
-        DrawBirdHelper ( x,  y,  vx,  vy, 1.7, birdColor , t);
-        DrawBirdHelper (x2, y2, vx2, vy2,   2, birdColor2, t);
-        DrawBirdHelper (x3, y3, vx3, vy3, 1.3, birdColor3, t);
-        DrawBirdHelper (x4, y4, vx4, vy4, 2.2, birdColor4, t);
+        DrawBirdHelper (bird1, t);
+        DrawBirdHelper (bird2, t);
+        DrawBirdHelper (bird3, t);
+        DrawBirdHelper (bird4, t);
 
-        printf ("MoveBall before physics (): x = %i\n", x);
+        //printf ("MoveBall before physics (): x = %i\n", x);
 
-        Physics ( &x,  &y,  &vx,  &vy, dt);
-        Physics (&x2, &y2, &vx2, &vy2, dt);
-        Physics (&x3, &y3, &vx3, &vy3, dt);
-        Physics (&x4, &y4, &vx4, &vy4, dt);
+        Physics (&bird1.x, &bird1.y, &bird1.vx, &bird1.vy, dt);
+        Physics (&bird2.x, &bird2.y, &bird2.vx, &bird2.vy, dt);
+        Physics (&bird3.x, &bird3.y, &bird3.vx, &bird3.vy, dt);
+        Physics (&bird4.x, &bird4.y, &bird4.vx, &bird4.vy, dt);
 
-        printf ("MoveBall after physics ():  x = %i\n", x);
+        //printf ("MoveBall after physics ():  x = %i\n", x);
 
-        Control (&vx, &vy, VK_SPACE, VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN);
-        Control (&vx2, &vy2, '1', 'C', 'Z', 'S', 'X');
-        Control (&vx3, &vy3, '2', 'N', 'V', 'H', 'B');
-        Control (&vx4, &vy4, '3', 'G', 'D', 'R', 'F');
+        Control (&bird1.vx, &bird1.vy, VK_SPACE, VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN);
+        Control (&bird2.vx, &bird2.vy, '1',      'C',      'Z',     'S',   'X'    );
+        Control (&bird3.vx, &bird3.vy, '2',      'N',      'V',     'H',   'B'    );
+        Control (&bird4.vx, &bird4.vy, '3',      'G',      'D',     'R',   'F'    );
 
         printf ("\n");
 
         t++;
-        txSleep (10);
+        txSleep (20);
         }
+
+    txEnd ();
     }
 
 void Physics (int* x, int* y, int* vx, int* vy, int dt)
     {
-    printf ("BeginPhysics (): x = %i\n", *x);
+    //printf ("BeginPhysics (): x = %i\n", *x);
 
     *x = *x + dt * *vx;
 
@@ -112,7 +112,7 @@ void Physics (int* x, int* y, int* vx, int* vy, int dt)
         *y = 0;
         }
 
-    printf ("EndPhysics ():   x = %i\n", *x);
+    //printf ("EndPhysics ():   x = %i\n", *x);
     }
 
 void Control (int* vx, int* vy, int KeySpace, int KeyRight, int KeyLeft, int KeyUp, int KeyDown)
@@ -138,39 +138,39 @@ void Control (int* vx, int* vy, int KeySpace, int KeyRight, int KeyLeft, int Key
 
 void Colors (int* x, COLORREF* birdColor, COLORREF first, COLORREF second, COLORREF third, COLORREF fourth, COLORREF fifth)
     {
-    printf ("Colors ():   x = %i: ", *x);
+    //printf ("Colors ():   x = %i: ", *x);
 
     if ( -1 < *x && *x <= 200)
         {
         *birdColor = first;
-        printf ("A");
+        //printf ("A");
         }
 
     if (200 < *x && *x <= 400)
         {
         *birdColor = second;
-        printf ("B");
+        //printf ("B");
         }
 
     if (400 < *x && *x <= 600)
         {
         *birdColor = third;
-        printf ("C");
+        //printf ("C");
         }
 
     if (600 < *x && *x <= 800)
         {
         *birdColor = fourth;
-        printf ("D");
+        //printf ("D");
         }
 
     if (800 < *x && *x <= 1000)
         {
         *birdColor = fifth;
-        printf ("E");
+        //printf ("E");
         }
 
-    printf ("\n");
+    //printf ("\n");
     }
 
 void DrawBird (int x, int y,
@@ -199,7 +199,7 @@ void DrawBird (int x, int y,
     txLine (x-19*sizeX, y-5*sizeY, x-15*sizeX, y-5*sizeY);
     }
 
-void DrawBirdHelper (int x, int y, int vx, int vy, double size, COLORREF birdColor, int t)
+void DrawBirdHelper (SBird bird, int t)
     {
-    DrawBird (x, y, ((vx < 0)? size : -size), size, 0, 0, t/2%2*8, t/3%3 + 10, t/3%5 + 10, birdColor);
+    DrawBird (bird.x, bird.y, ((bird.vx < 0)? bird.size : -bird.size), bird.size, 0, 0, t/2%2*8, t/3%3 + 10, t/3%5 + 10, bird.color);
     }
