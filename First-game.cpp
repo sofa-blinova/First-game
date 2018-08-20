@@ -33,6 +33,7 @@ void DrawBird (int x, int y,
                double tail, double wind,
                COLORREF birdColor);
 void DrawBirdHelper (SBird bird, int t);
+void FillBirdArray (SBird birds [], int nBirds);
 //-----------------------------------------------------------------------------
 
 int main ()
@@ -57,18 +58,8 @@ void MoveBird ()
                             {100, 200, 4, 2,   2, RGB (255, 0, 0), colors2, {'1',      'C',      'Z',     'S',   'X'    }},
                             {300,   0, 1, 3, 1.3, RGB (255, 0, 0), colors3, {'2',      'N',      'V',     'H',   'B'    }},
                             {800, 500, 3, 4, 2.2, RGB (255, 0, 0), colors4, {'3',      'G',      'D',     'R',   'F'    }}};
-    int i = 4;
-    while (i < NBirds)
-        {
-        birds[i].x  = rand () % 500;
-        birds[i].y  = rand () % 400;
-        birds[i].vx = rand () %   5;
-        birds[i].vy = rand () %   5;
-        birds[i].size = rand () % 2 + 1;
-        birds[i].color = rand ();
 
-        i++;
-        }
+    FillBirdArray (birds, NBirds);
 
     int t = 0;
     int dt = 1;
@@ -228,4 +219,25 @@ void DrawBird (int x, int y,
 void DrawBirdHelper (SBird bird, int t)
     {
     DrawBird (bird.x, bird.y, ((bird.vx < 0)? bird.size : -bird.size), bird.size, 0, 0, t/2%2*8, t/3%3 + 10, t/3%5 + 10, bird.color);
+    }
+
+void FillBirdArray (SBird birds [], int nBirds)
+    {
+    int i = 4;
+    while (i < nBirds)
+        {
+        birds[i].x    = rand () % 500;
+        birds[i].y    = rand () % 400;
+        birds[i].vx   = rand () %   5 + 1;
+        birds[i].vy   = rand () %   5 + 1;
+        birds[i].size = rand () %   2 + 1;
+        birds[i].color = RGB (rand () % 255, rand () % 255, rand () % 255);
+        birds[i].colors.first  = RGB (rand () % 255, rand () % 255, rand () % 255);
+        birds[i].colors.second = RGB (rand () % 255, rand () % 255, rand () % 255);
+        birds[i].colors.third  = RGB (rand () % 255, rand () % 255, rand () % 255);
+        birds[i].colors.fourth = RGB (rand () % 255, rand () % 255, rand () % 255);
+        birds[i].colors.fifth  = RGB (rand () % 255, rand () % 255, rand () % 255);
+
+        i++;
+        }
     }
