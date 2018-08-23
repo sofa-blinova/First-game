@@ -24,7 +24,7 @@ struct SBird
     };
 
 void MoveBird ();
-void Colors (SBird* bird);
+void Colors   (SBird* bird);
 void Physics (SBird* bird, int dt);
 void Control (SBird* bird);
 void DrawBird (int x, int y,
@@ -33,7 +33,12 @@ void DrawBird (int x, int y,
                double tail, double wind,
                COLORREF birdColor);
 void DrawBirdHelper (SBird bird, int t);
-void FillBirdArray (SBird birds [], int nBirds);
+void FillBirdArray      (SBird birds [], int nBirds);
+void AddColorsForBirds  (SBird birds [], int nBirds);
+void ProcessBirds       (SBird birds [], int nBirds, int t, int dt);
+void DrawBirdsFromArray (SBird birds [], int nBirds, int t);
+void AddPhysicsForBirds (SBird birds [], int nBirds, int dt);
+void AddControlForBirds (SBird birds [], int nBirds);
 //-----------------------------------------------------------------------------
 
 int main ()
@@ -71,27 +76,14 @@ void MoveBird ()
         txSetFillColor (RGB (26, 140, 255));
         txClear ();
 
-        int i = 0;
-        while (i < NBirds)
-            {
-            Colors (&birds [i]);
-            i++;
-            }
+        AddColorsForBirds (birds, NBirds);
 
-        for (int i = 0; i < NBirds; i++) DrawBirdHelper (birds [i], t);
-
-        //printf ("MoveBall before physics (): x = %i\n", x);
-
-        for (int i = 0; i < NBirds; i++) Physics (&birds [i], dt);
-
-        //printf ("MoveBall after physics ():  x = %i\n", x);
-
-        for (int i = 0; i < NBirds; i++) Control (&birds [i]);
+        ProcessBirds (birds, NBirds, t, dt);
 
         printf ("\n");
 
         t++;
-        txSleep (20);
+        txSleep ();
         }
 
     txEnd ();
@@ -241,3 +233,36 @@ void FillBirdArray (SBird birds [], int nBirds)
         i++;
         }
     }
+
+void AddColorsForBirds (SBird birds [], int nBirds)
+    {
+    int i = 0;
+    while (i < NBirds)
+        {
+        Colors (&birds [i]);
+        i++;
+        }
+    }
+
+void ProcessBirds (SBird birds [], int nBirds, int t, int dt)
+    {
+    DrawBirdsFromArray (birds, nBirds, t);
+    AddPhysicsForBirds (birds, nBirds, dt);
+    AddControlForBirds (birds, nBirds);
+    }
+
+void DrawBirdsFromArray (SBird birds [], int nBirds, int t)
+    {
+    for (int i = 0; i < nBirds; i++) DrawBirdHelper (birds [i], t);
+    }
+
+void AddPhysicsForBirds(SBird birds [], int nBirds, int dt)
+    {
+    for (int i = 0; i < nBirds; i++) Physics (&birds [i], dt);
+    }
+
+void AddControlForBirds(SBird birds [], int nBirds)
+    {
+    for (int i = 0; i < nBirds; i++) Control (&birds [i]);
+    }
+
