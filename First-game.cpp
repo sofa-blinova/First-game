@@ -1,6 +1,6 @@
 #include "TXLib.h"
 
-const int NBirds = 40;
+const int NBirds = 10;
 
 struct SColors
     {
@@ -39,6 +39,8 @@ void ProcessBirds       (SBird birds [], int nBirds, int t, int dt);
 void DrawBirdsFromArray (SBird birds [], int nBirds, int t);
 void AddPhysicsForBirds (SBird birds [], int nBirds, int dt);
 void AddControlForBirds (SBird birds [], int nBirds);
+void BirdAndMouseInteraction (SBird* bird);
+void BirdsAndMouseInteraction (SBird birds [], int nBirds);
 //-----------------------------------------------------------------------------
 
 int main ()
@@ -79,6 +81,10 @@ void MoveBird ()
         AddColorsForBirds (birds, NBirds);
 
         ProcessBirds (birds, NBirds, t, dt);
+
+        //BirdAndMouseInteraction (&birds [0]);
+
+        BirdsAndMouseInteraction (birds, NBirds);
 
         printf ("\n");
 
@@ -266,3 +272,41 @@ void AddControlForBirds(SBird birds [], int nBirds)
     for (int i = 0; i < nBirds; i++) Control (&birds [i]);
     }
 
+// סל. פאיכ "interaction of bird with mouse"
+
+void BirdAndMouseInteraction (SBird* bird)
+    {
+    POINT mouse = txMousePos ();
+
+    double Fx = mouse.x - bird->x;
+    double Fy = mouse.y - bird->y;
+
+    double m = 10;
+
+    double ax = Fx/m;
+    double ay = Fy/m;
+
+    bird->x = bird->x + ax;
+    bird->y = bird->y + ay;
+    }
+
+void BirdsAndMouseInteraction (SBird birds [], int nBirds)
+    {
+    for (int i = 0; i < nBirds; i++) BirdAndMouseInteraction (&birds [i]);
+    }
+
+double Distance (const SBird* bird1, const SBird* bird2)
+    {
+    double dx = bird1->x - bird2->x;
+    double dy = bird1->y - bird2->y;
+    double d = sqrt (dx*dx + dy*dy);
+    return d;
+    }
+
+void InteractionOfBirds (SBird birds [], int nBirds)
+    {
+    //double DDD = Distance (&bird [1], &bird [2]);
+    for (int bird1 = 0; bird1 < nBirds; bird1++)
+        for (int bird2 = 0; bird2 < nBirds; bird2++)
+            Distance (bird [bird1], bird [bird2]);
+    }
