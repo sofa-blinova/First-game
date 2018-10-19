@@ -1,9 +1,5 @@
 #include "TXLib.h"
-
-struct SVector
-    {
-    double x, y;
-    };
+#include "Vector.h"
 
 struct SBall
     {
@@ -19,15 +15,88 @@ void Physics (SBall* ball, int dt);
 void BallAndMouseInteraction (SBall* ball);
 double Distance (const SBall* ball1, const SBall* ball2);
 void InteractionOfBalls (SBall* ball1, SBall* ball2);
-SVector Difference (SVector A, SVector B);
-SVector operator - (SVector A, SVector B);
-SVector operator / (SVector A, double val);
-SVector operator * (SVector A, double val);
-double Length (SVector A);
-SVector Normalize (SVector A);
-//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 int main ()
+    {
+    txCreateWindow (1000, 650);
+
+    txBegin ();
+
+    txSetFillColor (RGB (26, 140, 255));
+    txRectangle (0, 0, 1000, 650);
+
+    //POINT mouse = txMousePos ();
+
+    //SVector A = txMousePos ();
+
+    SVector B = {150, 300};
+
+    while (true)
+        {
+        txSetFillColor (RGB (26, 140, 255));
+        txClear ();
+
+        txSetFillColor (TX_BLACK);
+        txCircle (A.x, A.y, 20);
+        txCircle (B.x, B.y, 15);
+
+        B = txMousePos ();
+
+        txSleep (50);
+
+        SVector d = A - B;
+        double dist = Length (d);
+        if (dist < 0.01) return;
+        double F = 500/dist;
+        SVector Fp = !d * F;
+
+        DrawVector (A, B, TX_CYAN);
+        DrawVector (A, A + Fp * 25, TX_LIGHTGREEN, 3);
+        DrawVector (A, A + !d * 25, TX_LIGHTRED, 2);
+        }
+
+    }
+
+int mmmain ()
+    {
+    txCreateWindow (1000, 650);
+
+    txBegin ();
+
+    txSetFillColor (RGB (26, 140, 255));
+    txRectangle (0, 0, 1000, 650);
+
+    SVector A = {200, 600};
+    SVector B = {900, 100};
+
+    bool followmouse = true;
+
+    while (true)
+        {
+        txSetFillColor (RGB (26, 140, 255));
+        txClear ();
+
+        txSetColor (TX_BLACK);
+        txCircle (A.x, A.y, 5);
+        txCircle (B.x, B.y, 5);
+
+        DrawVector (A, B, (followmouse ? TX_WHITE : TX_BLACK), (followmouse ? 2 : 7));
+
+        if (GetAsyncKeyState (VK_SPACE))
+            followmouse = ! followmouse;
+
+        if (GetAsyncKeyState (MK_LBUTTON) || followmouse == false)
+            A = txMousePos ();
+
+        if (GetAsyncKeyState (MK_RBUTTON) || followmouse)
+            B = txMousePos ();
+
+        txSleep (50);
+        }
+    }
+
+int mmain ()
     {
     txCreateWindow (1000, 650);
 
@@ -38,6 +107,7 @@ int main ()
     }
 
 //-----------------------------------------------------------------------------
+
 void MoveBall ()
     {
     SBall ball1 = {{100, 100}, 15, {1, 2}, TX_BLACK};
@@ -63,7 +133,7 @@ void MoveBall ()
         InteractionOfBalls (&ball1, &ball2);
 
         t++;
-        txSleep ();
+        txSleep (40);
         }
 
     txEnd ();
@@ -133,78 +203,29 @@ double Distance (const SBall* ball1, const SBall* ball2)
 
 void InteractionOfBalls (SBall* ball1, SBall* ball2)
     {
-    //if (d < 0.01) continue;
-
-    //double dx = ball2->pos.x - ball1->pos.x;
-    //double dy = ball2->pos.y - ball1->pos.y;
-
     SVector d = ball1->pos - ball2->pos;
 
     double dist = Length (d);
 
+    if (dist < 0.01) return;
+
     double F = 500/dist;
 
-    //double ix = dx/dist;
-    //double iy = dy/dist;
+    SVector Fp = !d * F;
 
-    SVector i = Normalize (d);
+    //txSetColor (TX_CYAN);
+    //txLine (ball1->pos.x, ball1->pos.y, ball2->pos.x, ball2->pos.y);
 
-    //double Fx = ix * F;
-    //double Fy = iy * F;
+    DrawVector (ball1->pos, ball2->pos, TX_CYAN);
 
-    SVector Fp = i * F;
+    //txSetColor (TX_LIGHTGREEN, 3);
+    //txLine (ball1->pos.x, ball1->pos.y, Fp.x*25 + ball1->pos.x, Fp.y*25 + ball1->pos.y);
 
-    txSetColor (TX_CYAN);
-    txLine  (ball1->pos.x, ball1->pos.y, ball2->pos.x, ball2->pos.y);
+    DrawVector (ball1->pos, ball1->pos + Fp * 25, TX_LIGHTGREEN, 3);
 
-    txSetColor (TX_LIGHTGREEN, 3);
-    txLine (ball1->pos.x, ball1->pos.y, Fp.x*25 + ball1->pos.x, Fp.y*25 + ball1->pos.y);
+    //txSetColor (TX_LIGHTRED, 2);
+    //txLine (ball1->pos.x, ball1->pos.y, !d.x*25 + ball1->pos.x, !d.y*25 + ball1->pos.y);
 
-    txSetColor (TX_LIGHTRED, 2);
-    txLine (ball1->pos.x, ball1->pos.y, i.x*25 + ball1->pos.x, i.y*25 + ball1->pos.y);
+    DrawVector (ball1->pos, ball1->pos + !d * 25, TX_LIGHTRED, 2);
 
-    }
-
-SVector Difference (SVector A, SVector B)
-    {
-    SVector result = { B.x - A.x, B.y - A.y };
-
-    return result;
-    }
-
-SVector operator - (SVector A, SVector B)
-    {
-    SVector result = { B.x - A.x, B.y - A.y };
-
-    return result;
-    }
-
-SVector operator / (SVector A, double val)
-    {
-    SVector result = { A.x / val, A.y / val };
-
-    return result;
-    }
-
-double Length (SVector A)
-    {
-    double leng = sqrt (A.x*A.x + A.y*A.y);
-
-    return leng;
-    }
-
-SVector Normalize (SVector A)
-    {
-    double leng = sqrt (A.x*A.x + A.y*A.y);
-
-    SVector norm = A / leng;
-
-    return norm;
-    }
-
-SVector operator * (SVector A, double val)
-    {
-    SVector result = {A.x * val, A.y * val};
-
-    return result;
     }
