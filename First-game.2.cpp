@@ -1,7 +1,7 @@
 #include "\\Mac\Home\Desktop\TX\TXLib.h"
 #include "Vector.h"
 
-const int NBirds = 10;
+const int NBalls = 5;
 
 struct SColors
     {
@@ -13,12 +13,14 @@ struct SKeys
     int KeySpace, KeyRight, KeyLeft, KeyUp, KeyDown;
     };
 
-struct SBird
+struct SBall
     {
     SVector p;
     SVector v;
 
     double m;
+
+    int exist;
 
     COLORREF color;
     SColors colors;
@@ -26,25 +28,27 @@ struct SBird
     SKeys keys;
     };
 
-void MoveBird ();
-void Colors   (SBird* bird);
-void Physics (SBird* bird, int dt);
-void Control (SBird* bird);
-void DrawBird (int x, int y,
+void MoveBall ();
+void Colors   (SBall* ball);
+void Physics (SBall* ball, int dt);
+void Control (SBall* ball);
+void DrawBall (int x, int y, double size, COLORREF ballcolor);
+/*void DrawBird (int x, int y,
                double sizeX, double sizeY,
                double leg, double step, double wing,
                double tail, double wind,
-               COLORREF birdColor);
-void DrawBirdHelper (SBird bird, int t);
-void FillBirdArray      (SBird birds [], int nBirds);
-void AddColorsForBirds  (SBird birds [], int nBirds);
-void ProcessBirds       (SBird birds [], int nBirds, int t, int dt);
-void DrawBirdsFromArray (SBird birds [], int nBirds, int t);
-void AddPhysicsForBirds (SBird birds [], int nBirds, int dt);
-void AddControlForBirds (SBird birds [], int nBirds);
-void BirdAndMouseInteraction (SBird* bird);
-void BirdsAndMouseInteraction (SBird birds [], int nBirds);
-void InteractionOdBirds (SBird birds [], int nBirds);
+               COLORREF ballColor);
+*/
+void DrawBallHelper (SBall ball, int t);
+void FillBallArray      (SBall balls [], int nBalls);
+void AddColorsForBalls  (SBall balls [], int nBalls);
+void ProcessBalls       (SBall balls [], int nBalls, int t, int dt);
+void DrawBallsFromArray (SBall balls [], int nBalls, int t);
+void AddPhysicsForBalls (SBall balls [], int nBalls, int dt);
+void AddControlForBalls (SBall balls [], int nBalls);
+void BallAndMouseInteraction (SBall* ball);
+void BallsAndMouseInteraction (SBall balls [], int nBalls);
+void InteractionOfBalls (SBall balls [], int nBalls);
 //-----------------------------------------------------------------------------
 
 int main ()
@@ -54,26 +58,30 @@ int main ()
     txSetFillColor (RGB (26, 140, 255));
     txRectangle (0, 0, 1000, 650);
 
-    MoveBird ();
+    MoveBall ();
     }
 //-----------------------------------------------------------------------------
 
-void MoveBird ()
+void MoveBall ()
     {
     SColors colors1 = {RGB (  2, 96,   2), RGB (100, 142,  62), RGB (  0, 187,   0), RGB ( 44, 244,  28), RGB (189, 255, 189)};
     SColors colors2 = {RGB (  4, 22, 187), RGB (100, 128, 255), RGB ( 90, 154, 241), RGB ( 17, 255, 255), RGB (  1, 186, 158)};
     SColors colors3 = {RGB (128,  0, 255), RGB (128,   0, 128), RGB (253,   2, 234), RGB (254, 141, 242), RGB (255,   0, 128)};
     SColors colors4 = {RGB (255,  0,   0), RGB (255, 140, 140), RGB (255, 128,   0), RGB (243, 191,  12), RGB (255, 255,   0)};
+    SColors colors5 = {RGB (234,  0,   1), RGB (212, 440, 140), RGB (255, 198,  57), RGB (543, 391, 642), RGB (265, 585,  37)};
 
-    SBird birds [NBirds] = {{{500, 325}, {3, 1}, 1.7, RGB (255, 0, 0), colors1, {VK_SPACE, VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN}},
-                            {{100, 200}, {4, 2},   2, RGB (255, 0, 0), colors2, {'1',      'C',      'Z',     'S',   'X'    }},
-                            {{300,   0}, {1, 3}, 1.3, RGB (255, 0, 0), colors3, {'2',      'N',      'V',     'H',   'B'    }},
-                            {{800, 500}, {3, 4}, 2.2, RGB (255, 0, 0), colors4, {'3',      'G',      'D',     'R',   'F'    }}};
+    SBall balls [NBalls] = {{{ 500, 325}, { 0,  0}, 50  , 1, RGB (255, 0, 0), colors1, {VK_SPACE, VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN}},
+                            {{   0, 325}, { 4,  2.6}, 9   , 1, RGB (255, 0, 0), colors2, {'1',      'C',      'Z',     'S',   'X'    }},
+                            {{1000, 325}, {-4, -2.6}, 9   , 1, RGB (255, 0, 0), colors3, {'2',      'N',      'V',     'H',   'B'    }},
+                            {{ 500,   0}, {-4,  2.6}, 9   , 1, RGB (255, 0, 0), colors4, {'3',      'G',      'D',     'R',   'F'    }},
+                            {{ 500, 650}, { 4, -2.6}, 9   , 1, RGB (255, 0, 0), colors5, {'4',      'K',      'H',     'U',   'J'    }}};
 
-    FillBirdArray (birds, NBirds);
+    FillBallArray (balls, NBalls);
 
     int t = 0;
     int dt = 1;
+
+    //if (ball.exist == 0) return;
 
     txBegin ();
 
@@ -82,19 +90,15 @@ void MoveBird ()
         txSetFillColor (RGB (26, 140, 255));
         txClear ();
 
-        AddColorsForBirds (birds, NBirds);
+        AddColorsForBalls (balls, NBalls);
 
-        ProcessBirds (birds, NBirds, t, dt);
+        ProcessBalls (balls, NBalls, t, dt);
 
-        InteractionOdBirds (birds, NBirds);
+        //InteractionOfBalls (balls, NBalls);
 
-        //BirdAndMouseInteraction (&birds [0]);
+        //BallAndMouseInteraction (&balls [0]);
 
-        BirdsAndMouseInteraction (birds, NBirds);
-
-        //printf ("birds[0].m = %lf\n", birds[0].m);
-
-        printf ("\n");
+        //BallsAndMouseInteraction (balls, NBalls);
 
         txGetFPS ();
 
@@ -105,110 +109,116 @@ void MoveBird ()
     txEnd ();
     }
 
-void Physics (SBird* bird, int dt)
+void Physics (SBall* ball, int dt)
     {
-    //printf ("BeginPhysics (): x = %i\n", *x);
-
-    //bird->x = bird->x + dt * bird->v.x;
-    //bird->y = bird->y + dt * bird->v.y;
-    if (bird->m > 0.5) bird->m = bird->m - 0.005;
-    bird->v = bird->v * 0.9;
-    bird->p = bird->p + dt * bird->v;
-
-    if (bird->p.x > 1000)
+    if (ball->exist == 1)
         {
-        bird->v.x = - bird->v.x;
-        bird->p.x = 1000;
-        }
+        //if (ball->m > 0.5) ball->m = ball->m - 0.005;
+        //ball->v = ball->v * 0.9;
+        ball->p = ball->p + dt * ball->v;
 
-    if (bird->p.x < 0)
-        {
-        bird->v.x = - bird->v.x;
-        bird->p.x = 0;
-        }
+        if (ball->p.x > 1000)
+            {
+            ball->v.x = - ball->v.x;
+            ball->p.x = 1000;
+            }
 
-    if (bird->p.y > 650)
-        {
-        bird->v.y = - bird->v.y;
-        bird->p.y = 650;
-        }
+        if (ball->p.x < 0)
+            {
+            ball->v.x = - ball->v.x;
+            ball->p.x = 0;
+            }
 
-    if (bird->p.y < 0)
-        {
-        bird->v.y = - bird->v.y;
-        bird->p.y = 0;
-        }
+        if (ball->p.y > 650)
+            {
+            ball->v.y = - ball->v.y;
+            ball->p.y = 650;
+            }
 
-    //printf ("EndPhysics ():   x = %i\n", bird->x);
+        if (ball->p.y < 0)
+            {
+            ball->v.y = - ball->v.y;
+            ball->p.y = 0;
+            }
+        }
     }
 
-void Control (SBird* bird)
+void Control (SBall* ball)
     {
-    if (GetAsyncKeyState (bird->keys.KeySpace))
+    if (ball->exist == 1)
         {
-        bird->v.x = 0;
-        bird->v.y = 0;
+        if (GetAsyncKeyState (ball->keys.KeySpace))
+            {
+            ball->v.x = 0;
+            ball->v.y = 0;
+            }
+
+        if (GetAsyncKeyState (ball->keys.KeyRight))
+            ball->v.x = ball->v.x + 1;
+
+        if (GetAsyncKeyState (ball->keys.KeyLeft))
+            ball->v.x = ball->v.x - 1;
+
+        if (GetAsyncKeyState (ball->keys.KeyUp))
+            ball->v.y = ball->v.y - 1;
+
+        if (GetAsyncKeyState (ball->keys.KeyDown))
+            ball->v.y = ball->v.y + 1;
         }
-
-    if (GetAsyncKeyState (bird->keys.KeyRight))
-        bird->v.x = bird->v.x + 1;
-
-    if (GetAsyncKeyState (bird->keys.KeyLeft))
-        bird->v.x = bird->v.x - 1;
-
-    if (GetAsyncKeyState (bird->keys.KeyUp))
-        bird->v.y = bird->v.y - 1;
-
-    if (GetAsyncKeyState (bird->keys.KeyDown))
-        bird->v.y = bird->v.y + 1;
     }
 
-void Colors (SBird* bird)
+void Colors (SBall* ball)
     {
-    //printf ("Colors ():   x = %i: ", bird.x);
-
-    if ( -1 < bird->p.x && bird->p.x <= 200)
+    if (ball->exist == 1)
         {
-        bird->color = bird->colors.first;
-        //printf ("A");
-        }
+        if ( -1 < ball->p.x && ball->p.x <= 200)
+            {
+            ball->color = ball->colors.first;
+            //printf ("A");
+            }
 
-    if (200 < bird->p.x && bird->p.x <= 400)
-        {
-        bird->color = bird->colors.second;
-        //printf ("B");
-        }
+        if (200 < ball->p.x && ball->p.x <= 400)
+            {
+            ball->color = ball->colors.second;
+            //printf ("B");
+            }
 
-    if (400 < bird->p.x && bird->p.x <= 600)
-        {
-        bird->color = bird->colors.third;
-        //printf ("C");
-        }
+        if (400 < ball->p.x && ball->p.x <= 600)
+            {
+            ball->color = ball->colors.third;
+            //printf ("C");
+            }
 
-    if (600 < bird->p.x && bird->p.x <= 800)
-        {
-        bird->color = bird->colors.fourth;
-        //printf ("D");
-        }
+        if (600 < ball->p.x && ball->p.x <= 800)
+            {
+            ball->color = ball->colors.fourth;
+            //printf ("D");
+            }
 
-    if (800 < bird->p.x && bird->p.x <= 1000)
-        {
-        bird->color = bird->colors.fifth;
-        //printf ("E");
+        if (800 < ball->p.x && ball->p.x <= 1000)
+            {
+            ball->color = ball->colors.fifth;
+            //printf ("E");
+            }
         }
-
-    //printf ("\n");
     }
 
-void DrawBird (int x, int y,
+void DrawBall (int x, int y, double size, COLORREF ballcolor)
+    {
+    txSetColor (TX_BLACK);
+    txSetFillColor (ballcolor);
+    txCircle (x, y, size);
+    }
+
+/*void DrawBird (int x, int y,
                double sizeX, double sizeY,
                double leg, double step, double wing,
                double tail, double wind,
-               COLORREF birdColor)
+               COLORREF ballColor)
     {
 
     txSetColor (TX_BLACK);
-    txSetFillColor (birdColor);
+    txSetFillColor (ballColor);
     txEllipse (x- 9*sizeX, y- 5*sizeY, x+9*sizeX, y+5*sizeY);                                  // 782; 366
     txEllipse (x-16*sizeX, y-12*sizeY, x-5*sizeX, y-2*sizeY);
     txSetFillColor (RGB (255, 255, 255));
@@ -225,167 +235,145 @@ void DrawBird (int x, int y,
     txLine (x-17*sizeX, y-8*sizeY, x-18*sizeX, y-5*sizeY);
     txLine (x-19*sizeX, y-5*sizeY, x-15*sizeX, y-5*sizeY);
     }
-
-void DrawBirdHelper (SBird bird, int t)
-    {
-    DrawBird (bird.p.x, bird.p.y, ((bird.v.x < 0)? bird.m : -bird.m), bird.m, 0, 0, t/2%2*8, t/3%3 + 10, t/3%5 + 10, bird.color);
-    }
-
-void FillBirdArray (SBird birds [], int nBirds)
-    {
-    int i = 4;
-    while (i < nBirds)
-        {
-        //birds[i].x    = rand () % 500;
-        //birds[i].y    = rand () % 400;
-        SVector rp = {rand () % 500, rand () % 400};
-        birds[i].p = rp;
-
-        //birds[i].v.x   = rand () %   5 + 1;
-        //birds[i].v.y   = rand () %   5 + 1;
-        SVector rv = {rand () % 5 + 1, rand () % 5 + 1};
-        birds[i].v = rv;
-
-        birds[i].m = rand () %   2 + 1;
-        birds[i].color = RGB (rand () % 255, rand () % 255, rand () % 255);
-        birds[i].colors.first  = RGB (rand () % 255, rand () % 255, rand () % 255);
-        birds[i].colors.second = RGB (rand () % 255, rand () % 255, rand () % 255);
-        birds[i].colors.third  = RGB (rand () % 255, rand () % 255, rand () % 255);
-        birds[i].colors.fourth = RGB (rand () % 255, rand () % 255, rand () % 255);
-        birds[i].colors.fifth  = RGB (rand () % 255, rand () % 255, rand () % 255);
-
-        i++;
-        }
-    }
-
-void AddColorsForBirds (SBird birds [], int nBirds)
-    {
-    int i = 0;
-    while (i < NBirds)
-        {
-        Colors (&birds [i]);
-        i++;
-        }
-    }
-
-void ProcessBirds (SBird birds [], int nBirds, int t, int dt)
-    {
-    DrawBirdsFromArray       (birds, nBirds, t);
-    //BirdsAndMouseInteraction (birds, nBirds);
-    AddPhysicsForBirds       (birds, nBirds, dt);
-    AddControlForBirds       (birds, nBirds);
-    }
-
-void DrawBirdsFromArray (SBird birds [], int nBirds, int t)
-    {
-    for (int i = 0; i < nBirds; i++) DrawBirdHelper (birds [i], t);
-    }
-
-void AddPhysicsForBirds(SBird birds [], int nBirds, int dt)
-    {
-    for (int i = 0; i < nBirds; i++) Physics (&birds [i], dt);
-    }
-
-void AddControlForBirds(SBird birds [], int nBirds)
-    {
-    for (int i = 0; i < nBirds; i++) Control (&birds [i]);
-    }
-
-// см. файл "interaction of bird with mouse"
-
-/*void BirdAndMouseInteraction (SBird* bird)
-    {
-    POINT mouse = txMousePos ();
-
-    double Fx = mouse.x - bird->x;
-    double Fy = mouse.y - bird->y;
-
-    double m = 10;
-
-    double ax = Fx/m;
-    double ay = Fy/m;
-
-    bird->x = bird->x + ax;
-    bird->y = bird->y + ay;
-    }
 */
 
-void BirdAndMouseInteraction (SBird* bird)
+void DrawBallHelper (SBall ball, int t)
     {
-    SVector M = txMousePos ();
-
-    //SVector d = {M.x - bird->x, M.y - bird->y};
-    SVector d = M - bird->p;
-
-    double dist = Length (d);
-
-    if (dist < 0.01) return;
-
-    double F = - (350/dist);
-    SVector Fp =  !d * F;
-
-    SVector a = Fp/bird->m;
-
-    //DrawVector ({bird->x, bird->y}, {bird->x + Fp.x * 50, bird->y + Fp.y * 50}, TX_LIGHTGREEN, 3);
-    //DrawVector (bird->p, bird->p + Fp * 50, TX_LIGHTGREEN, 3);
-
-    //bird->v.x = bird->v.x + a.x;
-    //bird->v.y = bird->v.y + a.y;
-    bird->v = bird->v + a;
-
-    if (dist < 5) bird->m = bird->m + 1;
-
-    //printf ("dist = %lf\n", dist);
+    if (ball.exist == 1) DrawBall (ball.p.x, ball.p.y, ball.m, ball.color);
     }
 
-void BirdsAndMouseInteraction (SBird birds [], int nBirds)
+void FillBallArray (SBall balls [], int nBalls)
     {
-    for (int i = 0; i < nBirds; i++) BirdAndMouseInteraction (&birds [i]);
+    int i = 4;
+    while (i < nBalls)
+        {
+        SVector rp = {rand () % 500, rand () % 400};
+        balls[i].p = rp;
+
+        //balls[i].v.x   = rand () %   5 + 1;
+        //balls[i].v.y   = rand () %   5 + 1;
+        SVector rv = {rand () % 5 + 1, rand () % 5 + 1};
+        balls[i].v = rv;
+
+        balls[i].m = rand () %   13 + 1;
+        balls[i].exist = 1;
+        balls[i].color = RGB (rand () % 255, rand () % 255, rand () % 255);
+        balls[i].colors.first  = RGB (rand () % 255, rand () % 255, rand () % 255);
+        balls[i].colors.second = RGB (rand () % 255, rand () % 255, rand () % 255);
+        balls[i].colors.third  = RGB (rand () % 255, rand () % 255, rand () % 255);
+        balls[i].colors.fourth = RGB (rand () % 255, rand () % 255, rand () % 255);
+        balls[i].colors.fifth  = RGB (rand () % 255, rand () % 255, rand () % 255);
+
+        i++;
+        }
     }
 
-double Distance (const SBird* bird1, const SBird* bird2)
+void AddColorsForBalls (SBall balls [], int nBalls)
     {
-    //double dx = bird1->x - bird2->x;
-    //double dy = bird1->y - bird2->y;
-    SVector d = bird1->p - bird2->p;
+    int i = 0;
+    while (i < nBalls)
+        {
+        Colors (&balls [i]);
+        i++;
+        }
+    }
+
+void ProcessBalls (SBall balls [], int nBalls, int t, int dt)
+    {
+    DrawBallsFromArray       (balls, nBalls, t);
+    //BallsAndMouseInteraction (balls, nBalls);
+    AddPhysicsForBalls       (balls, nBalls, dt);
+    AddControlForBalls       (balls, nBalls);
+    }
+
+void DrawBallsFromArray (SBall balls [], int nBalls, int t)
+    {
+    for (int i = 0; i < nBalls; i++) DrawBallHelper (balls [i], t);
+    }
+
+void AddPhysicsForBalls(SBall balls [], int nBalls, int dt)
+    {
+    for (int i = 0; i < nBalls; i++) Physics (&balls [i], dt);
+    }
+
+void AddControlForBalls(SBall balls [], int nBalls)
+    {
+    for (int i = 0; i < nBalls; i++) Control (&balls [i]);
+    }
+
+void BallAndMouseInteraction (SBall* ball)
+    {
+    if (ball->exist == 1)
+        {
+        SVector M = txMousePos ();
+
+        SVector d = M - ball->p;
+
+        double dist = Length (d);
+
+        if (dist < 0.01) return;
+
+        double F = (350/dist);
+        SVector Fp =  !d * F;
+
+        SVector a = Fp/ball->m;
+
+        ball->v = ball->v + a;
+
+        if (dist < 5) ball->m = ball->m + 1;
+        }
+    }
+
+void BallsAndMouseInteraction (SBall balls [], int nBalls)
+    {
+    for (int i = 0; i < nBalls; i++) BallAndMouseInteraction (&balls [i]);
+    }
+
+double Distance (const SBall* ball1, const SBall* ball2)
+    {
+    SVector d = ball1->p - ball2->p;
 
     double D = Length (d);
     return D;
     }
 
-void InteractionOdBirds (SBird birds [], int nBirds)
+void InteractionOfBalls (SBall balls [], int nBalls)
     {
-    for (int i = 0; i < nBirds; i++)                                    //   0 1 2 3    i++
+    for (int i = 0; i < nBalls; i++)                                    //   0 1 2 3    i++
         {                                                               // 0 -
-        //printf ("DrawBirdHelper (birds [%d], %d): \n", i, i);           // 1 - -        i2 = i + 1; i2++
+        //printf ("DrawballHelper (balls [%d], %d): \n", i, i);         // 1 - -        i2 = i + 1; i2++
                                                                         // 2 - - -
-        for (int i2 = i + 1; i2 < nBirds; i2++)                         // 3 - - - -
+        for (int i2 = i + 1; i2 < nBalls; i2++)                         // 3 - - - -
             {
-            SBird* bird1 = &birds [i];
-            SBird* bird2 = &birds [i2];
+            SBall* ball1 = &balls [i];
+            SBall* ball2 = &balls [i2];
 
-            //DrawVector (bird1->p, bird2->p, TX_WHITE);
+            if (ball1->exist == 1 && ball2->exist == 1)
+                {
+                SVector D = ball1->p - ball2->p;
+                double dist = Length (D);
 
-            SVector D = bird1->p - bird2->p;
-            double dist = Length (D);
+                double F = (40/dist);
+                SVector f1 = !D * F;
+                SVector f2 = - (!D * F);
 
-            double F = - (20/dist);
-            SVector f1 = !D * F;
-            SVector f2 = - (!D * F);
+                SVector a1 = f1/ball1->m;
+                SVector a2 = f2/ball2->m;
 
-            SVector a1 = f1/bird1->m;
-            SVector a2 = f2/bird2->m;
+                ball1->v = ball1->v + a1;
+                ball2->v = ball2->v + a2;
 
-            //DrawVector (bird1->p, bird1->p + f1 * 15, TX_BLACK, 3);
-            //DrawVector (bird2->p, bird2->p + f2 * 15, TX_RED, 3);
+                if (dist < (ball1->m + ball2->m)/2)
+                    {
+                    ball1->exist = 0;
 
-            bird1->v = bird1->v + a1;
-            bird2->v = bird2->v + a2;
+                    ball2->m = ball1->m + ball2->m;
+                    SVector p1 = ball2->v * ball2->m;
+                    SVector p2 = ball2->v * ball2->m;
+                    SVector p = p1 + p2;
+                    ball2->v = p/ball2->m;
+                    }
+                }
             }
         }
-
-
-    // 1. Изменение i2 на (i + 1)
-    // 2. Птицы будут считаться по 2 раза, но одна из них будет использоваться только
-    // для получения информации
     }
